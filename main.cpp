@@ -3,45 +3,117 @@
 
 #include <cassert>
 #include <iostream>
-#include "smart_pointers.h"
+#include "uniquePointer.h"
 
 
-class TestSmartPointer
+class TestUniquePointer
 {
 public:
     // test a few types
     static void testTypes()
     {
         {
-            SmartPointer<int> sp{};
-            assert(!sp);  // default nullptr
+            UniquePointer<int> up{};
+            assert(up==nullptr);  // default nullptr
         }
 
         { // int
-            SmartPointer<int> sp{ new int(5) };
-            assert(*sp == 5);
+            UniquePointer<int> up{ new int(5) };
+            assert(*up == 5);
         }
 
         { // std::string
-            SmartPointer<std::string> sp{ new std::string{ "Hello World!"} };
-            assert(*sp == "Hello World!");
+            UniquePointer<std::string> up{ new std::string{ "Hello World!"} };
+            assert(*up == "Hello World!");
         }
 
         { // char
-            SmartPointer<char> sp{ new char { 'a' } };
-            assert(*sp == 'a');
+            UniquePointer<char> up{ new char { 'a' } };
+            assert(*up == 'a');
         }
+    }
+
+
+	static void testAssignment()
+	{
+        // deleted assignment with L-Value UniquePointer reference, test R-Value reference
+		UniquePointer<int> up1{ new int(5) };
+		UniquePointer<int> up2 = std::move(up1);
+        assert(*up2 == 5);
+	}
+
+    static void testMoveConstructor()
+    {
+        // deleted Constructor with L-Value UniquePointer reference, test R-Value reference
+        UniquePointer<int> up1{ new int(5) };
+        UniquePointer<int> up2{ std::move(up1) };
+        assert(*up2 == 5);
     }
 
     // test uniqueness property
     static void testUnique()
     {
-        SmartPointer<int> sp1{ new int(5) };
-        assert(*sp1 == 5);
+        UniquePointer<int> up1{ new int(5) };
+        assert(*up1 == 5);
 
-        SmartPointer<int> sp2 = std::move(sp1);  // transfer ownership
-        assert(!sp1);  // sp1 set to nullptr
-        assert(*sp2 == 5);
+        UniquePointer<int> up2{ std::move(up1) };  // transfer ownership
+        assert(up1 == nullptr);  // up1 set to nullptr
+        assert(*up2 == 5);
+    }
+
+    static void testOverloadedOps()
+    {
+        UniquePointer<int> up1{ new int(5) };
+        UniquePointer<int> up2{ new int(5) };
+
+        assert(up1 != up2); // not pointing to same memory location
+        assert(up1 == up1); // same memory location
+
+        // bool
+        assert(up1);  // non nullptr evaluates as True
+
+        up2 = std::move(up1);
+        assert(!up1); // nullptr evaluates as false
+    }
+    
+    static void testRelease()
+    {
+        UniquePointer<int> up{ new int(5) };
+        int* memLocation = up.get();
+
+        int* data = up.release();
+
+        assert(*data == 5);
+        assert(data == memLocation);
+        assert(!up);
+    }
+
+    static void testReset()
+    {
+        UniquePointer<int> up{ new int(5) };
+        int* memLocation = up.get();
+
+        up.reset(new int(10));
+        assert(up.get() != memLocation);
+        assert(*up != 5);
+    }
+
+    static void testSwap()
+    {
+        UniquePointer<int> up1{ new int(5) };
+        int* up1_OldLocation = up1.get();
+
+        UniquePointer<int> up2{ new int(5) };
+        int* up2_OldLocation = up2.get();
+
+        up1.swap(up2);
+        assert(up2.get() == up1_OldLocation);
+        assert(up1.get() == up2_OldLocation);
+    }
+
+    static void testMakeUnique()
+    {
+        //auto up1 = make_unique(new int(5));
     }
 
 };
@@ -50,17 +122,16 @@ public:
 int main()
 {
 
-    TestSmartPointer::testTypes();
-    TestSmartPointer::testUnique();
+    TestUniquePointer::testTypes();
+    TestUniquePointer::testAssignment();
+    TestUniquePointer::testMoveConstructor();
+    TestUniquePointer::testUnique();
+    TestUniquePointer::testOverloadedOps();
+    TestUniquePointer::testRelease();
+    TestUniquePointer::testReset();
+    TestUniquePointer::testSwap();
 
-	int* temp = new int(5);
-	{
-		SmartPointer<int> sp{ temp };
-		std::cout << *temp << '\n';
-		std::cout << sp << '\n';
-	}
-	std::cout << *temp << '\n';
-
+    
 
  
     return 0;
