@@ -1,4 +1,4 @@
-// smart_pointers.cpp : This file contains the 'main' function. Program execution begins and ends there.
+// Test Harness for uniquePointer.h
 //
 
 #include <cassert>
@@ -137,7 +137,7 @@ public:
 
     static void testObj()
     {
-        auto up = make_unique(TestResource());
+        auto up{ make_unique(TestResource()) };
         assert(up->data == 5);
         assert(up->data2 == 6);
     }
@@ -160,7 +160,8 @@ int main()
     TestUniquePointer::testMakeUnique();
     TestUniquePointer::testObj();
 
+    auto up{ make_unique(5) };
+    std::cout << "ostream test: " << up << '\n';
 
     return 0;
 }
-
