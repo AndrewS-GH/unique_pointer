@@ -2,9 +2,16 @@
 //
 
 #include <cassert>
+#include <typeinfo>
 #include <iostream>
 #include "uniquePointer.h"
 
+
+struct TestResource
+{
+    int data{ 5 };
+    int data2{ 6 };
+};
 
 class TestUniquePointer
 {
@@ -14,7 +21,7 @@ public:
     {
         {
             UniquePointer<int> up{};
-            assert(up==nullptr);  // default nullptr
+            assert(up == nullptr);  // default nullptr
         }
 
         { // int
@@ -33,14 +40,21 @@ public:
         }
     }
 
+    static void testDeRef()
+    {
+        UniquePointer<int> up{ new int(5) };
+        *up = 100;
+        assert(*up == 100);
+    }
 
-	static void testAssignment()
-	{
+
+    static void testAssignment()
+    {
         // deleted assignment with L-Value UniquePointer reference, test R-Value reference
-		UniquePointer<int> up1{ new int(5) };
-		UniquePointer<int> up2 = std::move(up1);
+        UniquePointer<int> up1{ new int(5) };
+        UniquePointer<int> up2 = std::move(up1);
         assert(*up2 == 5);
-	}
+    }
 
     static void testMoveConstructor()
     {
@@ -75,7 +89,7 @@ public:
         up2 = std::move(up1);
         assert(!up1); // nullptr evaluates as false
     }
-    
+
     static void testRelease()
     {
         UniquePointer<int> up{ new int(5) };
@@ -113,7 +127,19 @@ public:
 
     static void testMakeUnique()
     {
-        //auto up1 = make_unique(new int(5));
+        auto up1 = make_unique(5);
+        assert(*up1 == 5);
+
+        UniquePointer<int> up2{ new int(10) };
+        assert(typeid(up1) == typeid(up2));
+
+    }
+
+    static void testObj()
+    {
+        auto up = make_unique(TestResource());
+        assert(up->data == 5);
+        assert(up->data2 == 6);
     }
 
 };
@@ -123,6 +149,7 @@ int main()
 {
 
     TestUniquePointer::testTypes();
+    TestUniquePointer::testDeRef();
     TestUniquePointer::testAssignment();
     TestUniquePointer::testMoveConstructor();
     TestUniquePointer::testUnique();
@@ -130,10 +157,10 @@ int main()
     TestUniquePointer::testRelease();
     TestUniquePointer::testReset();
     TestUniquePointer::testSwap();
+    TestUniquePointer::testMakeUnique();
+    TestUniquePointer::testObj();
 
-    
 
- 
     return 0;
 }
 
