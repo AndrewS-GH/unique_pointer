@@ -1,5 +1,4 @@
 // Test Harness for uniquePointer.h
-//
 
 #include <cassert>
 #include <typeinfo>
