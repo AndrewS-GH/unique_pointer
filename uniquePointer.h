@@ -40,11 +40,12 @@ public:
 			return *this;
 
 		// transfer ownership
-		delete m_data;
+		if (m_data)
+			delete m_data;
 		m_data = up.m_data;
 		up.m_data = nullptr;
 
-		return *this; // for chaining =
+		return *this;
 	}
 
 	T& operator*() const { return *m_data; }
