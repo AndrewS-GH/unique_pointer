@@ -45,7 +45,7 @@ public:
 		m_data = up.m_data;
 		up.m_data = nullptr;
 
-		return *this;
+		return *this;  // for chaining =
 	}
 
 	T& operator*() const { return *m_data; }
